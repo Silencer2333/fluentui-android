@@ -33,6 +33,7 @@ object UndefinedControlToken: IControlToken
  */
 open class ControlTokens : IControlTokens {
     enum class ControlType : IType {
+        ActionBarControlType,
         AnnouncementCardControlType,
         AppBarControlType,
         AvatarControlType,
@@ -76,11 +77,13 @@ open class ControlTokens : IControlTokens {
         TextFieldControlType,
         ToggleSwitchControlType,
         TooltipControlType,
+        ViewPagerControlType
     }
 
     override val tokens: TokenSet<IType, IControlToken> by lazy {
         TokenSet { type ->
             when (type) {
+                ControlType.ActionBarControlType -> ActionBarTokens()
                 ControlType.AnnouncementCardControlType -> AnnouncementCardTokens()
                 ControlType.AppBarControlType -> AppBarTokens()
                 ControlType.AvatarControlType -> AvatarTokens()
@@ -124,6 +127,7 @@ open class ControlTokens : IControlTokens {
                 ControlType.TextFieldControlType -> TextFieldTokens()
                 ControlType.ToggleSwitchControlType -> ToggleSwitchTokens()
                 ControlType.TooltipControlType -> TooltipTokens()
+                ControlType.ViewPagerControlType -> ViewPagerTokens()
                 else -> {
                     UndefinedControlToken
                 }

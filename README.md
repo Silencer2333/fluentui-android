@@ -147,20 +147,6 @@ dependencies {
  
  More information about contents of each module can be found in [Modularization](#modularization) section
 
-
-#### a) Develop for Surface-Duo:
-- Please also add the following lines to your repositories section in your gradle script:
-```gradle
-maven {
-    url "https://pkgs.dev.azure.com/MicrosoftDeviceSDK/DuoSDK-Public/_packaging/Duo-SDK-Feed/maven/v1"
-}
-```
-- Also add the SDK dependency to the module-level build.gradle file(current version may be  different
-from what's shown here):
-```gradle
-implementation "com.microsoft.device:dualscreen-layout:1.0.0-alpha01"
-```
-
 ### 2. Using Maven
 
 - Add the FluentUI library as a dependency:
@@ -199,10 +185,7 @@ implementation "com.microsoft.device:dualscreen-layout:1.0.0-alpha01"
     ```gradle
     implementation 'com.splitwise:tokenautocomplete:2.0.8'
     ```
-  - If using **CalendarView** or **DateTimePickerDialog**, include this dependency in your gradle file:
-    ```gradle
-    implementation 'com.jakewharton.threetenabp:threetenabp:1.1.0'
-    ```
+    
   - Double check that these library versions correspond to the latest versions we implement in the FluentUI [build.gradle](fluentui_others\build.gradle).
 
 ### Import and use the library

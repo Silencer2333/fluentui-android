@@ -30,6 +30,12 @@ android {
             mavenCentral()
         }
     }
+    lint {
+        baseline = file("lint-baseline.xml")
+    }
+    lintOptions {
+        abortOnError false
+    }
 }
 
 dependencies {

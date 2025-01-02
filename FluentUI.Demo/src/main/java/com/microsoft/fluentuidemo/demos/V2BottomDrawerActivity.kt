@@ -2,6 +2,8 @@ package com.microsoft.fluentuidemo.demos
 
 import android.content.res.Configuration
 import android.os.Bundle
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,8 +16,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,6 +32,7 @@ import com.microsoft.fluentui.theme.token.FluentAliasTokens
 import com.microsoft.fluentui.tokenized.controls.RadioButton
 import com.microsoft.fluentui.tokenized.controls.ToggleSwitch
 import com.microsoft.fluentui.tokenized.drawer.BottomDrawer
+import com.microsoft.fluentui.tokenized.drawer.DrawerValue
 import com.microsoft.fluentui.tokenized.drawer.rememberBottomDrawerState
 import com.microsoft.fluentui.tokenized.listitem.ListItem
 import com.microsoft.fluentuidemo.R
@@ -47,29 +50,35 @@ class V2BottomDrawerActivity : V2DemoActivity() {
 
     override val paramsUrl = "https://github.com/microsoft/fluentui-android/wiki/Controls#params-9"
     override val controlTokensUrl = "https://github.com/microsoft/fluentui-android/wiki/Controls#control-tokens-9"
+    private val onBackCallback = object: OnBackPressedCallback(true) { //callback to end the activity
+        override fun handleOnBackPressed() {
+            finish()
+        }
 
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setActivityContent {
             CreateActivityUI()
+            LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher?.addCallback(this, onBackCallback) //registering the callback to end the activity when back button is pressed
         }
     }
 }
 
 @Composable
 private fun CreateActivityUI() {
-    var scrimVisible by remember { mutableStateOf(true) }
-    var dynamicSizeContent by remember { mutableStateOf(false) }
-    var nestedDrawerContent by remember { mutableStateOf(false) }
-    var listContent by remember { mutableStateOf(true) }
-    var expandable by remember { mutableStateOf(true) }
-    var skipOpenState by remember { mutableStateOf(false) }
-    var selectedContent by remember { mutableStateOf(ContentType.FULL_SCREEN_SCROLLABLE_CONTENT) }
-    var slideOver by remember { mutableStateOf(false) }
-    var showHandle by remember { mutableStateOf(true) }
-    var enableSwipeDismiss by remember { mutableStateOf(true) }
-    var maxLandscapeWidthFraction by remember { mutableFloatStateOf(1F) }
-    var preventDismissalOnScrimClick by remember { mutableStateOf(false) }
+    var scrimVisible by rememberSaveable { mutableStateOf(true) }
+    var dynamicSizeContent by rememberSaveable { mutableStateOf(false) }
+    var nestedDrawerContent by rememberSaveable { mutableStateOf(false) }
+    var listContent by rememberSaveable { mutableStateOf(true) }
+    var expandable by rememberSaveable { mutableStateOf(true) }
+    var skipOpenState by rememberSaveable { mutableStateOf(false) }
+    var selectedContent by rememberSaveable { mutableStateOf(ContentType.FULL_SCREEN_SCROLLABLE_CONTENT) }
+    var slideOver by rememberSaveable { mutableStateOf(false) }
+    var showHandle by rememberSaveable { mutableStateOf(true) }
+    var enableSwipeDismiss by rememberSaveable { mutableStateOf(true) }
+    var maxLandscapeWidthFraction by rememberSaveable { mutableFloatStateOf(1F) }
+    var preventDismissalOnScrimClick by rememberSaveable { mutableStateOf(false) }
     var isLandscapeOrientation: Boolean = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         CreateDrawerWithButtonOnPrimarySurfaceToInvokeIt(
@@ -412,7 +421,7 @@ private fun CreateDrawerWithButtonOnPrimarySurfaceToInvokeIt(
 ) {
     val scope = rememberCoroutineScope()
 
-    val drawerState = rememberBottomDrawerState(expandable = expandable, skipOpenState = skipOpenState)
+    val drawerState = rememberBottomDrawerState(initialValue = DrawerValue.Closed, expandable = expandable, skipOpenState = skipOpenState)
 
     val open: () -> Unit = {
         scope.launch { drawerState.open() }
