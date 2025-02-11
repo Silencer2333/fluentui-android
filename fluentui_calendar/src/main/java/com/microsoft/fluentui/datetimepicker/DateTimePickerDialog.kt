@@ -16,16 +16,15 @@ import android.view.*
 import android.view.accessibility.AccessibilityEvent
 import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager.widget.ViewPager
-import com.jakewharton.threetenabp.AndroidThreeTen
 import com.microsoft.fluentui.calendar.R
 import com.microsoft.fluentui.calendar.CalendarView
 import com.microsoft.fluentui.calendar.OnDateSelectedListener
 import com.microsoft.fluentui.calendar.databinding.DialogDateTimePickerBinding
 import com.microsoft.fluentui.theming.FluentUIContextThemeWrapper
 import com.microsoft.fluentui.util.*
-import org.threeten.bp.Duration
-import org.threeten.bp.ZonedDateTime
 import com.microsoft.fluentui.calendar.databinding.DialogResizableBinding
+import java.time.Duration
+import java.time.ZonedDateTime
 
 // TODO consider merging PickerMode and DateRangeMode since not all combinations will work
 /**
@@ -117,10 +116,6 @@ class DateTimePickerDialog : AppCompatDialog, Toolbar.OnMenuItemClickListener, O
     private lateinit var dialogBinding: DialogResizableBinding
     private lateinit var dialogContainerBinding: DialogDateTimePickerBinding
     private lateinit var pagerAdapter: DateTimePagerAdapter
-
-    init {
-        AndroidThreeTen.init(context)
-    }
 
     @JvmOverloads
     constructor(
@@ -217,14 +212,7 @@ class DateTimePickerDialog : AppCompatDialog, Toolbar.OnMenuItemClickListener, O
 
     override fun onStart() {
         super.onStart()
-        context.activity?.let {
-            if (DuoSupportUtils.isDualScreenMode(it)) {
-                window?.setLayout(DuoSupportUtils.getSingleScreenWidthPixels(it),WindowManager.LayoutParams.MATCH_PARENT)
-            }
-            else {
-                window?.setLayout(context.desiredDialogSize[0], WindowManager.LayoutParams.MATCH_PARENT)
-            }
-        } ?: window?.setLayout(context.desiredDialogSize[0], WindowManager.LayoutParams.MATCH_PARENT)
+        window?.setLayout(context.desiredDialogSize[0], WindowManager.LayoutParams.MATCH_PARENT)
     }
 
     override fun dismiss() {

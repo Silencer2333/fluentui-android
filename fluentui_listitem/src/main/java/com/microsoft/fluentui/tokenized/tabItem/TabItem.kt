@@ -27,12 +27,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.invisibleToUser
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -42,7 +49,6 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.microsoft.fluentui.theme.FluentTheme
 import com.microsoft.fluentui.theme.token.ControlTokens
-import com.microsoft.fluentui.theme.token.FluentAliasTokens
 import com.microsoft.fluentui.theme.token.FluentGlobalTokens
 import com.microsoft.fluentui.theme.token.FluentStyle
 import com.microsoft.fluentui.theme.token.Icon
@@ -50,6 +56,7 @@ import com.microsoft.fluentui.theme.token.controlTokens.TabItemInfo
 import com.microsoft.fluentui.theme.token.controlTokens.TabItemTokens
 import com.microsoft.fluentui.theme.token.controlTokens.TabTextAlignment
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun TabItem(
     title: String,
@@ -81,14 +88,16 @@ fun TabItem(
         ),
         animationSpec = tween(durationMillis = 300)
     )
-    val iconColor by animateColorAsState (
-        targetValue = token.iconColor(tabItemInfo = tabItemInfo).getColorByState(
-            enabled = enabled,
-            selected = selected,
-            interactionSource = interactionSource
-        ),
-        animationSpec = tween(durationMillis = 300)
+    val iconColorBrush: Brush = token.iconColor(tabItemInfo = tabItemInfo).getBrushByState(
+        enabled = enabled,
+        selected = selected,
+        interactionSource = interactionSource
     )
+
+    val indicatorColor: Brush = token.indicatorColor(tabItemInfo = tabItemInfo).getBrushByState(
+        enabled = enabled, selected = selected, interactionSource = interactionSource
+    )
+
     val padding = token.padding(tabItemInfo = tabItemInfo)
     val backgroundColor = token.backgroundBrush(tabItemInfo = tabItemInfo).getBrushByState(
         enabled = enabled, selected = selected, interactionSource = interactionSource
@@ -112,9 +121,19 @@ fun TabItem(
     val iconContent: @Composable () -> Unit = {
         Icon(
             imageVector = icon,
-            modifier = Modifier.size(if (textAlignment == TabTextAlignment.NO_TEXT) 28.dp else 24.dp),
+            modifier = Modifier
+                        .semantics {
+                            invisibleToUser()
+                        }
+                        .size(if (textAlignment == TabTextAlignment.NO_TEXT) 28.dp else 24.dp)
+                        .graphicsLayer(alpha = 0.99f)
+                        .drawWithCache {
+                            onDrawWithContent {
+                                drawContent()
+                                drawRect(brush = iconColorBrush, blendMode = BlendMode.SrcAtop)
+                            }
+                        },
             contentDescription = if (textAlignment == TabTextAlignment.NO_TEXT) title else null,
-            tint = iconColor
         )
     }
 
@@ -145,6 +164,9 @@ fun TabItem(
             BasicText(
                 text = title,
                 modifier = Modifier
+                    .semantics {
+                        invisibleToUser()
+                    }
                     .constrainAs(textConstrain) {
                         start.linkTo(iconConstrain.end)
                         end.linkTo(badgeConstrain.start)
@@ -214,7 +236,7 @@ fun TabItem(
                     totalWidth,
                     totalHeight
                 ) {
-
+                    
                     anchorPlaceable.placeRelative(0, 0)
                     val badgeX = anchorPlaceable.width + badgeHorizontalOffset
                     val badgeY = badgeVerticalOffset.roundToPx()
@@ -241,11 +263,11 @@ fun TabItem(
         ) {
             badgeWithIcon()
 
-            val fontStyle = FluentTheme.aliasTokens.typography[FluentAliasTokens.TypographyTokens.Caption2]
-            var fontSize = remember { mutableStateOf(fontStyle.fontSize) }
+            val textTypography = token.textTypography(tabItemInfo = tabItemInfo)
+            var fontSize = remember { mutableStateOf(textTypography.fontSize) }
             var textStyle by remember(textColor) {
                 mutableStateOf(
-                    fontStyle.merge(TextStyle(color = textColor, fontSize = fontSize.value))
+                    textTypography.merge(TextStyle(color = textColor, fontSize = fontSize.value))
                 )
             }
 
@@ -256,12 +278,8 @@ fun TabItem(
                     style = textStyle,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    onTextLayout = { textLayoutResult ->
-                        if (textLayoutResult.didOverflowHeight) {
-                            textStyle.fontSize
-                            fontSize.value *= 0.9
-                            textStyle = textStyle.copy(fontSize = fontSize.value)
-                        }
+                    modifier = Modifier.semantics {
+                        invisibleToUser()
                     }
                 )
             }
@@ -277,7 +295,7 @@ fun TabItem(
                         modifier = Modifier
                             .height(3.dp)
                             .width(indicatorWidth)
-                            .background(shape = RoundedCornerShape(indicatorCornerRadiusSize), color = textColor)
+                            .background(shape = RoundedCornerShape(indicatorCornerRadiusSize), brush = indicatorColor)
                             .clip(RoundedCornerShape(indicatorCornerRadiusSize))
                     )
                 }

@@ -46,6 +46,12 @@ android {
     }
     productFlavors {
     }
+    lint {
+        baseline = file("lint-baseline.xml")
+    }
+    lintOptions {
+        abortOnError false
+    }
 }
 
 gradle.taskGraph.whenReady { taskGraph ->
@@ -66,8 +72,8 @@ dependencies {
     implementation "androidx.cardview:cardview:1.0.0"
     implementation "com.google.android.material:material:$materialVersion"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation "com.microsoft.device:dualscreen-layout:$duoVersion"
     implementation "androidx.constraintlayout:constraintlayout:$constraintLayoutVersion"
+    implementation "androidx.compose.foundation:foundation:$composeFoundationVersion"
     implementation "androidx.compose.material:material"
 
     testImplementation "junit:junit:$junitVersion"
